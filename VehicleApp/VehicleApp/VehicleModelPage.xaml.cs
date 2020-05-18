@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using VehicleApp.UI;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -16,41 +17,41 @@ namespace VehicleApp
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class VehicleModelPage : ContentPage
     {
-        VehicleMake vehicleMake;
-        VehicleModelViewModel viewModel;
+       
+        IVehicleModelViewModel viewModel;
         IVehicleModel VehicleModel;
        List<VehicleModel> VehicleModelList;
-        public VehicleModelPage(VehicleMake vehicleMake)
+        public VehicleModelPage(string vehicleMakeName)
         {
-            this.vehicleMake = vehicleMake;
-            Debug.Write("==============" + this.vehicleMake.Name);
+         
             InitializeComponent();
 
             using (var lifeTime =
           App.Container.BeginLifetimeScope())
             {
 
-                viewModel = App.Container.Resolve<VehicleModelViewModel>();
+                viewModel = App.Container.Resolve<IVehicleModelViewModel>();
                 VehicleModel = App.Container.Resolve<IVehicleModel>();
             };
 
-            initView();
+            initView(vehicleMakeName);
 
 
         }
         public VehicleModelPage()
         {
             InitializeComponent();
-            vehicleMake = new VehicleMake();
-            var dictionary = new VehicleModelService(new VehicleModel()).modelsList;
-            VehicleModelList = dictionary[vehicleMake.Name];
-            BindingContext = this;
+            //IVehicleMake make = App.Container.Resolve<IVehicleMake>();
+            //IVehicleModel model = App.Container.Resolve<IVehicleModel>();
+            //var dictionary = App.Container.Resolve<IVehicleModelViewModel>().GetVehicleModelViewModel().getVehicleModelList(model,"").Result;
+            //VehicleModelList = dictionary;
+            //BindingContext = this;
             
         }
 
-        async private void initView()
+        async private void initView(string name)
         {
-            var dictionary = await viewModel.getVehicleModelList(VehicleModel, vehicleMake.Name);
+            var dictionary = await viewModel.GetVehicleModelViewModel().getVehicleModelList(VehicleModel, name);
             VehicleModelList = dictionary;
             VehicleModelList.ForEach(s => { Debug.Write("==========" + s.Name + " " + s.MakeId); });
             BindingContext = this;

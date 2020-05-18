@@ -19,7 +19,7 @@ namespace VehicleApp
     public partial class MainPage : ContentPage
     {
        public List<VehicleMake> VehicleMakeList { get; private set; }
-        VehicleMakeViewModel viewModel;
+        IVehicleMakeViewModel viewModel;
       
         IVehicleMake ivehicleMake;
         public MainPage()
@@ -37,10 +37,10 @@ namespace VehicleApp
             using (var lifeTime =
             App.Container.BeginLifetimeScope()) {
                 
-                viewModel = App.Container.Resolve<VehicleMakeViewModel>();
+                viewModel = App.Container.Resolve<IVehicleMakeViewModel>();
                 ivehicleMake = App.Container.Resolve<IVehicleMake>();
             };
-            VehicleMakeList = await viewModel.getVehicleMakeList(ivehicleMake);
+            VehicleMakeList = await viewModel.getVehicleMakeViewModel().getVehicleMakeList(ivehicleMake);
 
             VehicleListView.ItemsSource = VehicleMakeList;
         }
@@ -52,7 +52,7 @@ namespace VehicleApp
             {
                 return;
             }
-            await Navigation.PushModalAsync(new NavigationPage(new VehicleModelPage(vehicleMake)));
+            await Navigation.PushModalAsync(new NavigationPage(new VehicleModelPage(vehicleMake.Name)));
 
             VehicleListView.SelectedItem = null;
         }

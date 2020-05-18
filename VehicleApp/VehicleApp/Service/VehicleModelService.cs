@@ -79,7 +79,7 @@ namespace Service
         private List<VehicleModel> getListFromDictionary(string name)
         {
 
-            Thread.Sleep(5000);
+           
             return modelsList[name];
         }
 

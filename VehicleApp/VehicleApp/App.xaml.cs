@@ -20,6 +20,8 @@ namespace VehicleApp
             builder.RegisterType<VehicleMakeService>().As<IVehicleMakeService>();
             builder.RegisterType<VehicleModel>().As<IVehicleModel>();
             builder.RegisterType<VehicleModelService>().As<IVehicleModelService>();
+            builder.RegisterType<VehicleModelViewModel>().As<IVehicleModelViewModel>();
+            builder.RegisterType<VehicleMakeViewModel>().As<IVehicleMakeViewModel>();
 
             builder.Register(t=>new VehicleMakeViewModel(new VehicleMakeService(new VehicleMake())));
            // builder.Register(t=>new VehicleModelViewModel(new VehicleModelService(new VehicleModel())));
