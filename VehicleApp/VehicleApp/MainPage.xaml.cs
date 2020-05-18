@@ -32,16 +32,15 @@ namespace VehicleApp
            
         }
 
-        private void InitList()
+        async private void InitList()
         {
-            //VehicleMakeList = new VehicleMakeService(new VehicleMake()).vehiclesList;
             using (var lifeTime =
             App.Container.BeginLifetimeScope()) {
                 
                 viewModel = App.Container.Resolve<VehicleMakeViewModel>();
                 ivehicleMake = App.Container.Resolve<IVehicleMake>();
             };
-            VehicleMakeList = viewModel.getVehicleMakeList(ivehicleMake).Result;
+            VehicleMakeList = await viewModel.getVehicleMakeList(ivehicleMake);
 
             VehicleListView.ItemsSource = VehicleMakeList;
         }

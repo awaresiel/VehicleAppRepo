@@ -26,7 +26,7 @@ namespace VehicleApp.UI
         async public Task<List<VehicleMake>> getVehicleMakeList(IVehicleMake s)
         {
            
-            return await Task.FromResult(iVehicleMakeService.GetVehicleMakeService(s).Result.vehiclesList);
+            return await Task.FromResult(iVehicleMakeService.GetVehicleMakeService(s).Result.GetVehiclesAsync().Result);
         }
     }
 

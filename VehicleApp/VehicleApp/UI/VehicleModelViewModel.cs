@@ -24,7 +24,7 @@ namespace VehicleApp.UI
 
       async public Task<List<VehicleModel>> getVehicleModelList(IVehicleModel model, string name)
         {
-            return await Task.FromResult( VehicleModelService.GetVehicleModelService(model).Result.modelsList[name]);
+            return await Task.FromResult( VehicleModelService.GetVehicleModelService(model)).Result.Result.getVehicleModelListAsync(name);
         }
     }
 }

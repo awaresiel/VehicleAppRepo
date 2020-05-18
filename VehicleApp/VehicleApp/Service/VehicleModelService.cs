@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Repository;
 using System.Linq;
+using System.Threading;
 
 namespace Service
 {
@@ -67,6 +68,22 @@ namespace Service
 
         }
 
+       async public Task<List<VehicleModel>> getVehicleModelListAsync(string name)
+        {
+
+           var list = await Task.Run(()=> getListFromDictionary(name));
+
+            return list ;
+        }
+
+        private List<VehicleModel> getListFromDictionary(string name)
+        {
+
+            Thread.Sleep(5000);
+            return modelsList[name];
+        }
+
+       
        
 
         public VehicleModel GetVehicleModel(int id, int makeID, string name, string abbreviation)
