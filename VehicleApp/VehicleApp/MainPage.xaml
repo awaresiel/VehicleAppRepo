@@ -5,22 +5,32 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="VehicleApp.MainPage"
+             Title="{Binding Title}"
              x:Name="VehiclePage">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Add Vehicle"
+                 IconImageSource="example_icon.png"
+                     Clicked="ToolbarItem_Clicked_Add_Vehicle"
+                 Order="Primary"
+                 Priority="1" />
+    </ContentPage.ToolbarItems>
+
 
     <StackLayout>
         <!-- Place new controls here -->
         <ListView x:Name="VehicleListView" ItemsSource="{Binding VehicleMakeList}" VerticalOptions="FillAndExpand" HasUnevenRows="true" 
-                 IsPullToRefreshEnabled="true" IsRefreshing="{Binding IsBusy, Mode=OneWay}" CachingStrategy="RecycleElement" 
+                   RefreshCommand="{Binding LoadItemsCommand}"
+                 IsPullToRefreshEnabled="True" IsRefreshing="{Binding IsBusy, Mode=OneWay}" CachingStrategy="RecycleElement" 
                   ItemSelected="VehicleListView_ItemSelected">
             
             <ListView.ItemTemplate>
                 <DataTemplate>
                     
                     <ViewCell>
-                        <StackLayout Padding="10">
-                            <Label Text="{Binding Name}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
-                            <Label Text="{Binding Id}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
-                            <Label Text="{Binding Abbreviation}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
+                        <StackLayout  Padding="10" Orientation="Horizontal" HorizontalOptions="Center">
+                            <Label Text="{Binding Name, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
+                            <Label Text="{Binding Id, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16"/>
+                            <Label Text="{Binding Abbreviation, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
                         </StackLayout>
                     </ViewCell>
                     

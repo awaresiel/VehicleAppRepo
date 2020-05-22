@@ -19,20 +19,14 @@ namespace VehicleApp
     {
        
         IVehicleModelViewModel viewModel;
-        IVehicleModel VehicleModel;
-       List<VehicleModel> VehicleModelList;
+        string VehicleMakeName = "";
+      
         public VehicleModelPage(string vehicleMakeName)
         {
-         
+            VehicleMakeName = vehicleMakeName;
             InitializeComponent();
-
-            using (var lifeTime =
-          App.Container.BeginLifetimeScope())
-            {
-
-                viewModel = App.Container.Resolve<IVehicleModelViewModel>();
-                VehicleModel = App.Container.Resolve<IVehicleModel>();
-            };
+            //viewModel = App.Container.Resolve<IVehicleModelViewModel>();
+            viewModel = App.Container.Resolve<IVehicleModelViewModel>(new TypedParameter(typeof(string), vehicleMakeName));
 
             initView(vehicleMakeName);
 
@@ -41,21 +35,34 @@ namespace VehicleApp
         public VehicleModelPage()
         {
             InitializeComponent();
-            //IVehicleMake make = App.Container.Resolve<IVehicleMake>();
-            //IVehicleModel model = App.Container.Resolve<IVehicleModel>();
-            //var dictionary = App.Container.Resolve<IVehicleModelViewModel>().GetVehicleModelViewModel().getVehicleModelList(model,"").Result;
-            //VehicleModelList = dictionary;
-            //BindingContext = this;
-            
+           
         }
 
-        async private void initView(string name)
+          private void initView(string vehicleMakeName )
         {
-            var dictionary = await viewModel.GetVehicleModelViewModel().getVehicleModelList(VehicleModel, name);
-            VehicleModelList = dictionary;
-            VehicleModelList.ForEach(s => { Debug.Write("==========" + s.Name + " " + s.MakeId); });
-            BindingContext = this;
-            VehicleModelListView.ItemsSource = VehicleModelList;
+           
+            viewModel.getVehicleModelList(vehicleMakeName);
+            BindingContext = viewModel;
+            
+        }
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            System.Diagnostics.Debug.WriteLine("==============OnAppearing()============");
+
+            if (viewModel.ListCount() == 0)
+                viewModel.GetCommand().Execute(null);
+            else viewModel.GetCommand().Execute(viewModel);
+        }
+
+
+        async private void ToolbarItem_Clicked_Add_Vehicle_Make(object sender, EventArgs e)
+        {
+            PageMakeVehicleModel page = new PageMakeVehicleModel(VehicleMakeName,false);
+
+            await Navigation.PushModalAsync(page);
+            
         }
     }
 }

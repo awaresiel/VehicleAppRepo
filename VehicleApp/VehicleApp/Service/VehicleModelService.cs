@@ -5,12 +5,18 @@ using System.Threading.Tasks;
 using Repository;
 using System.Linq;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Service
 {
     public interface IVehicleModelService
     {
         Task<VehicleModelService> GetVehicleModelService(IVehicleModel s);
+        Task<List<VehicleModel>> getVehicleModelListAsync(string name);
+        Task<bool> CreateVehicleModel(string vehicleMakeName,int id, int makeID, string name, string abbreviation);
+        Task<List<VehicleModel>> SortVehicleModelsASC_DESC(string nameOfModel, bool ascOrDesc);
+        Task<List<VehicleModel>> GetVehicleModel(string name, int id);
+        Task<bool> DeleteVehicleModel(string name, int id);
 
     }
     public class VehicleModelService : IVehicleModelService
@@ -22,55 +28,65 @@ namespace Service
 
 
         IVehicleModel iVehicleModel;
-       public Dictionary<string, List<VehicleModel>> modelsList { get; private set; }
+       public static Dictionary<string, List<VehicleModel>> modelsList { get; private set; }
 
         public VehicleModelService(IVehicleModel iVehicleModel)
         {
             this.iVehicleModel = iVehicleModel;
-            modelsList = new Dictionary<string, List<VehicleModel>>();
-
-            // taken from https://nhts.ornl.gov/2009/pub/2009FARSMakeModel.pdf
+            InitModels();
 
 
-            modelsList.Add("Acura", new List<VehicleModel> { new VehicleModel(031,54,"Integra","(ACUR)"),
+        }
+
+
+        public static void InitModels()
+        {
+            if (modelsList==null)
+            {
+                modelsList = new Dictionary<string, List<VehicleModel>>();
+
+                // taken from https://nhts.ornl.gov/2009/pub/2009FARSMakeModel.pdf
+
+
+                modelsList.Add("Acura", new List<VehicleModel> { new VehicleModel(031,54,"Integra","(ACUR)"),
                                                         new VehicleModel(032,54,"Legend","(ACUR)" ),
                                                         new VehicleModel(033,54,"NSX","(ACUR)" ),
                                                         new VehicleModel(034,54,"Vigor","(ACUR)" ),
                                                         new VehicleModel(035,54,"TL","(ACUR)" ),
             });
-            modelsList.Add("Alfa Romeo", new List<VehicleModel> { new VehicleModel(031,31,"Spider","(ALFA)"),
+                modelsList.Add("Alfa Romeo", new List<VehicleModel> { new VehicleModel(031,31,"Spider","(ALFA)"),
                                                         new VehicleModel(032,31,"Sports Sedan","(ALFA)" ),
                                                         new VehicleModel(033,31,"Sprint/Special","(ALFA)" ),
                                                         new VehicleModel(034,31,"GTV-6","(ALFA)" ),
                                                         new VehicleModel(035,31,"Alpha 164","(ALFA)" ),
             });
 
-            modelsList.Add("AM General", new List<VehicleModel> { new VehicleModel(401,03,"Dispatcher","(AMGN)"),
+                modelsList.Add("AM General", new List<VehicleModel> { new VehicleModel(401,03,"Dispatcher","(AMGN)"),
                                                         new VehicleModel(402,03,"Hummer","(AMGN)" ),
                                                         new VehicleModel(421,03,"Hummer(SUV)","(AMGN)" ),
-                                                      
+
             });
 
-            modelsList.Add("American Motors", new List<VehicleModel> { new VehicleModel(001,01,"Rambler","(AMER)"),
+                modelsList.Add("American Motors", new List<VehicleModel> { new VehicleModel(001,01,"Rambler","(AMER)"),
                                                         new VehicleModel(002,01,"Rebel/Matador/Marlin","(ALFA)" ),
                                                         new VehicleModel(003,01,"Pacer","(ALFA)" ),
                                                         new VehicleModel(004,01,"AMX","(ALFA)" ),
-                                                       
+
             });
 
-            modelsList.Add("Audi", new List<VehicleModel> { new VehicleModel(031,32,"Super90","(AUDI)"),
+                modelsList.Add("Audi", new List<VehicleModel> { new VehicleModel(031,32,"Super90","(AUDI)"),
                                                         new VehicleModel(032,32,"100","(AUDI)" ),
                                                         new VehicleModel(033,32,"Fox","(AUDI)" ),
                                                         new VehicleModel(034,32,"4000","(AUDI)" ),
 
             });
-
-
+            }
+           
         }
 
        async public Task<List<VehicleModel>> getVehicleModelListAsync(string name)
         {
-
+            
            var list = await Task.Run(()=> getListFromDictionary(name));
 
             return list ;
@@ -79,16 +95,29 @@ namespace Service
         private List<VehicleModel> getListFromDictionary(string name)
         {
 
-           
-            return modelsList[name];
+            if (modelsList.ContainsKey(name))
+            {
+                return modelsList[name];
+            }
+            else
+            {
+                modelsList.Add(name, new List<VehicleModel>());
+                return modelsList[name];
+            }
+            
         }
 
        
        
 
-        public VehicleModel GetVehicleModel(int id, int makeID, string name, string abbreviation)
+      async  public Task<bool> CreateVehicleModel(string vehicleMakeName, int id, int makeID, string name, string abbreviation)
         {
-            return iVehicleModel.GetVehicleModel(id,makeID,name,abbreviation);
+            var vehicle = iVehicleModel.GetVehicleModel(id,makeID,name,abbreviation);
+            lock (this)
+            {
+                modelsList[vehicleMakeName].Add(vehicle);
+            }
+            return await Task.FromResult(modelsList[vehicleMakeName].Contains(vehicle));
         }
 
         public async Task<List<VehicleModel>> SortVehicleModelsASC_DESC(string nameOfModel,bool ascOrDesc)

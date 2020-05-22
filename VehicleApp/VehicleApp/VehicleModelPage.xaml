@@ -5,9 +5,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="VehicleApp.VehicleModelPage">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Add Vehicle Make"
+                 IconImageSource="example_icon.png"
+                     Clicked="ToolbarItem_Clicked_Add_Vehicle_Make"
+                 Order="Primary"
+                 Priority="1" />
+    </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout>
-            <ListView x:Name="VehicleModelListView" ItemsSource="{Binding VehicleModelList}" VerticalOptions="FillAndExpand" HasUnevenRows="True" 
+            <ListView x:Name="VehicleModelListView"  RefreshCommand="{Binding LoadItemsCommand}" ItemsSource="{Binding VehicleModelList}" VerticalOptions="FillAndExpand" HasUnevenRows="True" 
                         IsRefreshing="{Binding IsBusy, Mode=OneWay}" CachingStrategy="RecycleElement" >
                 <ListView.ItemTemplate>
                     <DataTemplate>

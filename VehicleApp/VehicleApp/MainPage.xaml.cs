@@ -18,31 +18,29 @@ namespace VehicleApp
     [DesignTimeVisible(false)]
     public partial class MainPage : ContentPage
     {
-       public List<VehicleMake> VehicleMakeList { get; private set; }
+     
         IVehicleMakeViewModel viewModel;
       
-        IVehicleMake ivehicleMake;
+       
         public MainPage()
         {   InitializeComponent();
-
-            BindingContext = this;
-            VehicleMakeList = new List<VehicleMake>();
-
-            InitList();
+            viewModel = App.Container.Resolve<IVehicleMakeViewModel>();
+            BindingContext = viewModel;
            
+
         }
 
-        async private void InitList()
-        {
-            using (var lifeTime =
-            App.Container.BeginLifetimeScope()) {
-                
-                viewModel = App.Container.Resolve<IVehicleMakeViewModel>();
-                ivehicleMake = App.Container.Resolve<IVehicleMake>();
-            };
-            VehicleMakeList = await viewModel.getVehicleMakeViewModel().getVehicleMakeList(ivehicleMake);
+        
 
-            VehicleListView.ItemsSource = VehicleMakeList;
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            System.Diagnostics.Debug.WriteLine("==============OnAppearing()============");
+
+            if (viewModel.ListCount() == 0)
+                viewModel.GetCommand().Execute(null);
+            else viewModel.GetCommand().Execute(viewModel);
         }
 
         async private void VehicleListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
@@ -55,6 +53,15 @@ namespace VehicleApp
             await Navigation.PushModalAsync(new NavigationPage(new VehicleModelPage(vehicleMake.Name)));
 
             VehicleListView.SelectedItem = null;
+        }
+
+        async private void ToolbarItem_Clicked_Add_Vehicle(object sender, EventArgs e)
+        {
+            PageMakeVehicle page = new PageMakeVehicle(false);
+            
+            await Navigation.PushModalAsync(page);
+        
+            
         }
     }
 }

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Name="popupVehicleMake"
+       
+             x:Class="VehicleApp.PageMakeVehicle">
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical" HeightRequest="200" WidthRequest="300" BackgroundColor="White">
+            <Entry Margin="20,20,20,10" Placeholder="Enter Name" Text="{Binding Name}" ></Entry>
+            <Entry Margin="20,0,20,10" Placeholder="Enter Abbrivation" Text="{Binding Abbrivation}"></Entry>
+            <Entry Margin="20,0,20,0" Placeholder="Enter Id" Text="{Binding Id}"></Entry>
+            <Button Margin="20,20,20,0" Text="Save" Clicked="Button_Clicked"></Button>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

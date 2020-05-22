@@ -18,14 +18,24 @@ namespace VehicleApp
          
             builder.RegisterType<VehicleMake>().As<IVehicleMake>();
             builder.RegisterType<VehicleMakeService>().As<IVehicleMakeService>();
+
             builder.RegisterType<VehicleModel>().As<IVehicleModel>();
             builder.RegisterType<VehicleModelService>().As<IVehicleModelService>();
-            builder.RegisterType<VehicleModelViewModel>().As<IVehicleModelViewModel>();
+
+            builder.RegisterType<VehicleModelViewModel>().As<IVehicleModelViewModel>()
+                .WithParameter(new TypedParameter(typeof(string), "VehicleMake"));
+
             builder.RegisterType<VehicleMakeViewModel>().As<IVehicleMakeViewModel>();
 
-            builder.Register(t=>new VehicleMakeViewModel(new VehicleMakeService(new VehicleMake())));
-           // builder.Register(t=>new VehicleModelViewModel(new VehicleModelService(new VehicleModel())));
-            builder.RegisterType<VehicleModelViewModel>();
+            //builder.Register(t => new VehicleMakeViewModel());
+            builder.Register(t => new VehicleMakeService(t.Resolve<IVehicleMake>())) ;
+
+            //builder.Register(t => new VehicleModelViewModel(t.Resolve<IVehicleModelService>()));
+            builder.Register(t => new VehicleModelService(t.Resolve<IVehicleModel>()));
+
+           
+
+
 
             Container = builder.Build();
 
@@ -33,7 +43,7 @@ namespace VehicleApp
 
             InitializeComponent();
 
-            MainPage = new MainPage();
+            MainPage = new NavigationPage(new MainPage());
         }
 
         public static void RegisterType<T>() where T : class
