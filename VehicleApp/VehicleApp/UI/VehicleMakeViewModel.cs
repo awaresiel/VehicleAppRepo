@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using AutoMapper;
 using Repository;
 using Service;
 using System;
@@ -32,12 +33,12 @@ namespace VehicleApp.UI
         public Command LoadItemsCommand { get; set; }
 
 
-        public string Name { get; set; }
-        public string Abbrivation { get; set; }
-
         public int Id { get; set; }
 
-        public bool IsEdit { get; set; }
+        public string Name { get; set; }
+        public string Abbreviation { get; set; }
+
+        public bool IsEdit { get;  private set; }
 
         public ObservableCollection<VehicleMake> VehicleMakeList { get; private set; }
 
@@ -91,13 +92,16 @@ namespace VehicleApp.UI
 
             if (!IsEdit)
             {
-                if (Name == null || Id == 0 || Abbrivation == null)
+                if (Name == null || Id == 0 || Abbreviation == null)
                 {
                     return isAdded;
                 }
                 else
                 {
-                    isAdded=  await iVehicleMakeService.MakeVehicle(Id, Name, Abbrivation);
+                    // IS THIS CORRECT USE OF AUTOMAPPER FOR THIS PROJECT?
+                    VehicleMake vehicleMake = App.Mapper.Map<VehicleMakeViewModel,VehicleMake>(this);
+
+                    isAdded=  await iVehicleMakeService.MakeVehicle(vehicleMake.Id, vehicleMake.Name, vehicleMake.Abbreviation);
                   
                 }
             }

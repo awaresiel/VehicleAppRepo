@@ -102,7 +102,9 @@ namespace VehicleApp.UI
                 }
                 else
                 {
-                   isAdded = await iVehicleModelService.CreateVehicleModel(VehicleMakeName, Id,MakeId,Name,Abbrivation);
+                   // VehicleModel vehicleModel = App.Mapper.Map<VehicleModelViewModel, VehicleModel>(this);
+
+                    isAdded = await iVehicleModelService.CreateVehicleModel(VehicleMakeName, Id,MakeId,Name,Abbrivation);
 
                     Debug.WriteLine("==============CreateVehicleModel================ isAdded= " +isAdded);
                 }

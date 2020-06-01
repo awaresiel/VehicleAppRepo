@@ -27,6 +27,7 @@ namespace Repository
         }
         public VehicleMake MakeVehicle(int id,  string name, string abbr)
         {
+           
             return new VehicleMake(id,name,abbr);
         }
     }
