@@ -12,24 +12,10 @@ using Xamarin.Forms.Internals;
 
 namespace Service
 {
-    public interface IVehicleMakeService
-    {
-         Task<VehicleMakeService> GetVehicleMakeService(IVehicleMake s);
-         Task<List<VehicleMake>> GetVehicleByID(int id);
-         Task<List<VehicleMake>> GetVehiclesAsync();
-         Task<List<VehicleMake>> FilterVehicles(string name);
-         Task<List<VehicleMake>> SortVehiclesASC_DESC(bool ascOrDesc);
-         Task<bool> MakeVehicle(int id, string name, string abbr);
-
-    }
 
     public class VehicleMakeService: IVehicleMakeService
     {
-       async public Task<VehicleMakeService> GetVehicleMakeService(IVehicleMake s)
-        {
-            return await Task.FromResult(new VehicleMakeService(s));
-        }
-
+     
 
         public static List<VehicleMake> vehiclesList { get; private set; } = new List<VehicleMake>(){
 
@@ -44,22 +30,19 @@ namespace Service
         IVehicleMake iVehicleMake;
         public  VehicleMakeService(IVehicleMake iVehicleMake)
         {
-           
             this.iVehicleMake = iVehicleMake;
-            
         }
 
       
 
-
         public async Task<List<VehicleMake>> GetVehicleByID(int id)
         {
           
-            var item = await Task.Run(()=> vehiclesList.Any( v => v.Id == id));
+            var item = await Task.FromResult( vehiclesList.Any( v => v.Id == id));
             
             if (item)
             {
-                List<VehicleMake> list = await Task.Run(()=>vehiclesList.ToList().FindAll( (v) =>  v.Id == id).ToList());
+                List<VehicleMake> list = await Task.FromResult(vehiclesList.FindAll( (v) =>  v.Id == id).ToList());
                 
 
                 return list;
@@ -69,14 +52,35 @@ namespace Service
             
         }
 
-        public async Task<List<VehicleMake>> GetVehiclesAsync()
+        public async Task<List<VehicleMake>> UpdateVehicle(int id,VehicleMake vehicleMake)
         {
-            return await Task.FromResult(vehiclesList);
+
+
+            var index = await Task.FromResult(vehiclesList.FindIndex(v => v.Id == id));
+
+            if (index !=-1)
+            {
+               
+                vehiclesList[index] = vehicleMake;
+            
+                return vehiclesList;
+            }
+
+            return null;
+
         }
 
-        public async Task<bool> DeleteVehicleByID(int id)
+        public async Task<List<VehicleMake>> GetVehiclesAsync(bool ascOrDesc)
         {
-            int number = await Task.Run(() => vehiclesList.ToList().RemoveAll((v) => v.Id == id));
+            var list =  SortVehiclesASC_DESC(ascOrDesc);
+            
+                return await list;
+            
+        }
+
+        public async Task<bool> DeleteVehicle(string name)
+        {
+            int number = await Task.FromResult( vehiclesList.RemoveAll((v) => v.Name == name));
             if (number>0)
             {
                 return true;
@@ -90,7 +94,7 @@ namespace Service
         {
             List<VehicleMake> tempList = vehiclesList;
 
-            var list = await Task.Run(() => tempList.ToList().FindAll(v => v.Name == name));
+            var list = await Task.Run(() => tempList.FindAll(v => v.Name == name));
 
             tempList.Clear();
             foreach (var item in tempList) tempList.Add(item);
@@ -99,25 +103,41 @@ namespace Service
         }
 
 
-        public async Task<List<VehicleMake>> SortVehiclesASC_DESC(bool ascOrDesc)
+        async public Task<List<VehicleMake>> SortVehiclesASC_DESC(bool ascOrDesc)
         {
             List<VehicleMake> templist = vehiclesList;
 
             if (ascOrDesc)
             {
-                var tl = await Task.Run(()=> templist.OrderBy(v => v.Name).ToList());
+
+                
+             //       var tl = Task.Run(() =>
+             //      {
+             //          var stopwatch = new Stopwatch();
+             //           stopwatch.Start();
+             //          System.Threading.Thread.Sleep(2000);
+             //          Debug.WriteLine("===== async: Running for {0} seconds, Thread name= {1}", stopwatch.Elapsed.TotalSeconds, System.Threading.Thread.CurrentThread.Name);
+             //          stopwatch.Stop();
+
+             //          return templist.OrderBy(v => v.Name).ToList();
+             //      });
+             //       Debug.WriteLine("== Another thread name main threard = " + System.Threading.Thread.CurrentThread.ToString());
+                    
                
-                return tl;
+                //var tl = await Task.Run(()=>  templist.OrderBy(v => v.Name).ToList());
+                var tl =  Task.FromResult( templist.OrderBy(v => v.Name).ToList());
+
+                return await tl;
+                
             }
             else
             {
-                var tl = await Task.Run(()=> templist.OrderByDescending(v1 => v1.Name).ToList());
-               
-                return tl;
+               // var tl =  Task.Run(()=> templist.OrderByDescending(v1 => v1.Name).ToList());
+                var tl = await Task.FromResult( templist.OrderByDescending(v1 => v1.Name).ToList());
+          
+                return  tl;
             }
             
-
-           
         }
 
        async public Task<bool> MakeVehicle(int id, string name, string abbr)
@@ -125,9 +145,17 @@ namespace Service
             var vehicle = iVehicleMake.MakeVehicle(id, name, abbr);
             lock (this)
             {
-                vehiclesList.Add(vehicle);
-              
-              
+
+                if (vehiclesList.Any(v=> v.Id == id))
+                {
+                    vehiclesList.RemoveAll(v => v.Id == id);
+                    
+                }
+             
+                    vehiclesList.Add(vehicle);
+
+
+
             }
 
             return await Task.FromResult(vehiclesList.Contains(vehicle));

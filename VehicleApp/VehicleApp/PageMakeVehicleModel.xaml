@@ -9,8 +9,9 @@
         <StackLayout Orientation="Vertical" HeightRequest="200" WidthRequest="300" BackgroundColor="White">
             <Entry Margin="20,20,20,10" Placeholder="Enter Name" Text="{Binding Name}" ></Entry>
             <Entry Margin="20,0,20,10" Placeholder="Enter Abbrivation" Text="{Binding Abbrivation}"></Entry>
+            <Entry Margin="20,0,20,0" Placeholder="Enter Make Id" Text="{Binding MakeId}"></Entry>
             <Entry Margin="20,0,20,0" Placeholder="Enter Id" Text="{Binding Id}"></Entry>
-            <Entry Margin="20,0,20,0" Placeholder="Enter Id" Text="{Binding MakeId}"></Entry>
+            
             <Button Margin="20,20,20,0" Text="Save" Clicked="Button_Clicked"></Button>
         </StackLayout>
     </ContentPage.Content>

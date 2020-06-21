@@ -17,11 +17,24 @@ namespace VehicleApp.UI
 
         public IVehicleModelService iVehicleModelService = App.Container.Resolve<IVehicleModelService>();
 
-        bool isBusy = false;
+        public BaseViewModel()
+        {
+            MessagingCenter.Subscribe<MainPage, string>(this, "Delete", async (s, arg) =>
+            {
+               await iVehicleModelService.DeleteVehicleModel(arg, 0, true);
+             
+            });
+        }
+
+        bool isBusy=false;
         public bool IsBusy
         {
             get { return isBusy; }
-            set { SetProperty(ref isBusy, value); }
+            set 
+            {    
+                SetProperty(ref isBusy, value);
+               
+            }
         }
 
         string title = string.Empty;
@@ -29,6 +42,21 @@ namespace VehicleApp.UI
         {
             get { return title; }
             set { SetProperty(ref title, value); }
+        }
+
+        public int IdForEditing { get; set; }
+
+        bool order = true;
+        public bool Order
+        {
+            get { return order; }
+            set { SetProperty(ref order, value); }
+        }
+        string orderName = string.Empty;
+        public string OrderName
+        {
+            get { return orderName; }
+            set { SetProperty(ref orderName, value); }
         }
 
         protected bool SetProperty<T>(ref T backingStore, T value,
@@ -39,6 +67,8 @@ namespace VehicleApp.UI
                 return false;
 
             backingStore = value;
+
+            //Debug.WriteLine("=backingStore= " + backingStore + " =value= " + value);
             onChanged?.Invoke();
             OnPropertyChanged(propertyName);
             return true;
@@ -53,7 +83,7 @@ namespace VehicleApp.UI
             var changed = PropertyChanged;
             if (changed == null)
                 return;
-            Debug.WriteLine("OnPropertyChanged====propertyName=============="+propertyName);
+            Debug.WriteLine("OnPropertyChanged====propertyName============== " + propertyName);
             changed.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 

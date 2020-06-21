@@ -19,100 +19,103 @@ using Xamarin.Forms.Xaml;
 
 namespace VehicleApp.UI
 {
-    public interface IVehicleMakeViewModel
-    {
-        // VehicleMakeViewModel getVehicleMakeViewModel();
-        Task<bool> CreateVehicleMake();
-        void IsEditVehicleMake(bool isEdit);
-        int ListCount();
-        System.Windows.Input.ICommand GetCommand();
-    }
+
     public class VehicleMakeViewModel : BaseViewModel, IVehicleMakeViewModel
     {
 
         public Command LoadItemsCommand { get; set; }
+        
+        string TemporarlyOriginalName = string.Empty;
 
+        private int id;
+        public int Id { get { return id; } set { SetProperty(ref id, value);  } }
+        private string name;
+        public string Name { get { return name; } set { SetProperty(ref name,value); } }
+        private string abrv;
+        public string Abbreviation { get { return abrv; } set { SetProperty(ref abrv, value); } }
 
-        public int Id { get; set; }
-
-        public string Name { get; set; }
-        public string Abbreviation { get; set; }
-
-        public bool IsEdit { get;  private set; }
 
         public ObservableCollection<VehicleMake> VehicleMakeList { get; private set; }
 
-
-
         public VehicleMakeViewModel()
         {
-            Title = "VehicleMakePage";
+            Title = "Vehicle Makes";
             VehicleMakeList = new ObservableCollection<VehicleMake>();
-            LoadItemsCommand = new Command(async () => await InitalizeList());
+            LoadItemsCommand = new Command(execute: async () => await InitalizeList());
+            OrderName = Order ? "DESC" : "ASC";
+         }
 
-
-
-        }
-
-        async public Task InitalizeList()
+        async Task InitalizeList()
         {
             if (IsBusy) return;
-
             IsBusy = true;
+
             try
             {
                 VehicleMakeList.Clear();
-                var list = await iVehicleMakeService.GetVehiclesAsync();
+                var list = await iVehicleMakeService.GetVehiclesAsync(Order);
+
                 foreach (var item in list)
                 {
-                    System.Diagnostics.Debug.WriteLine("=InitalizeList============ " + item.Name);
                     VehicleMakeList.Add(item);
                 }
+
             }
             catch (Exception ex)
             {
-
-                Debug.WriteLine(ex);
+                Debug.WriteLine("======exception==== " + ex);
             }
             finally
             {
-                IsBusy = false;
+               IsBusy = false;
             }
 
-
-
-
         }
-
 
         async public Task<bool> CreateVehicleMake()
         {
-           
             bool isAdded = false;
-
-            if (!IsEdit)
+            if (Name == null || Id == 0 || Id < 0 || Abbreviation == null)
             {
-                if (Name == null || Id == 0 || Abbreviation == null)
-                {
-                    return isAdded;
-                }
-                else
-                {
-                    // IS THIS CORRECT USE OF AUTOMAPPER FOR THIS PROJECT?
-                    VehicleMake vehicleMake = App.Mapper.Map<VehicleMakeViewModel,VehicleMake>(this);
-
-                    isAdded=  await iVehicleMakeService.MakeVehicle(vehicleMake.Id, vehicleMake.Name, vehicleMake.Abbreviation);
-                  
-                }
+                return isAdded;
             }
 
-
-            return isAdded;
+            if (IdForEditing ==-1)
+            {
+                    // IS THIS CORRECT USE OF AUTOMAPPER FOR THIS PROJECT?
+                    VehicleMake vehicleMake = App.Mapper.Map<VehicleMakeViewModel, VehicleMake>(this);
+                    isAdded = await iVehicleMakeService.MakeVehicle(vehicleMake.Id, vehicleMake.Name, vehicleMake.Abbreviation);
+             }
+            else
+            {    
+                VehicleMake vehicleMake = App.Mapper.Map<VehicleMakeViewModel, VehicleMake>(this);
+                var flag= await iVehicleMakeService.UpdateVehicle(IdForEditing, vehicleMake);
+               
+               await iVehicleModelService.UpdateDictionaryKey(TemporarlyOriginalName, vehicleMake.Name);
+                
+                isAdded = flag == null ? false : true;
+               
+            }
+                 return isAdded;
         }
 
-        public void IsEditVehicleMake(bool isEdit)
+        async public void IsEditVehicleMake(int id)
         {
-            IsEdit = isEdit;
+            
+            IdForEditing = id;
+            if (IdForEditing != -1)
+            {
+                var vehicles = await iVehicleMakeService.GetVehicleByID(id);
+                if (vehicles!=null)
+                {
+                    Name = vehicles[0].Name;
+                    TemporarlyOriginalName = Name;
+                    Abbreviation = vehicles[0].Abbreviation;
+                    Id = vehicles[0].Id;
+                
+                }
+               
+            }
         }
 
         public int ListCount()
@@ -126,11 +129,28 @@ namespace VehicleApp.UI
 
         public ICommand GetCommand()
         {
-            Debug.WriteLine(" GET LoadItemsCommand====");
             return LoadItemsCommand;
         }
 
+        public bool GetOrder()
+        {
+            return Order;
+        }
 
+        async public void SetOrder(bool order)
+        {
+            Order = order;
+            OrderName = Order ? "DESC" : "ASC";
+            await InitalizeList();
+
+        }
+
+       async public Task<bool> DeleteVehicleMake(string name)
+        {
+            var deleted = await iVehicleMakeService.DeleteVehicle(name);
+            await InitalizeList();
+            return  deleted;
+        }
     }
 
 }

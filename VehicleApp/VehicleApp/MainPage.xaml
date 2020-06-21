@@ -5,33 +5,41 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="VehicleApp.MainPage"
-             Title="{Binding Title}"
              x:Name="VehiclePage">
+    <NavigationPage.TitleView>
+        <Label Text="{Binding Title}" HorizontalOptions="Center" TextColor="White" FontSize="Medium"/>
+     </NavigationPage.TitleView>
+    
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Add Vehicle"
-                 IconImageSource="example_icon.png"
+                 
                      Clicked="ToolbarItem_Clicked_Add_Vehicle"
                  Order="Primary"
-                 Priority="1" />
+                 Priority="2" />
+        <ToolbarItem Text="{Binding OrderName}" Order="Primary" Priority="1" Clicked="ToolbarItem_Order_Clicked"/>
     </ContentPage.ToolbarItems>
 
 
     <StackLayout>
         <!-- Place new controls here -->
         <ListView x:Name="VehicleListView" ItemsSource="{Binding VehicleMakeList}" VerticalOptions="FillAndExpand" HasUnevenRows="true" 
-                   RefreshCommand="{Binding LoadItemsCommand}"
-                 IsPullToRefreshEnabled="True" IsRefreshing="{Binding IsBusy, Mode=OneWay}" CachingStrategy="RecycleElement" 
-                  ItemSelected="VehicleListView_ItemSelected">
-            
+                   RefreshCommand="{Binding LoadItemsCommand}" ItemSelected="VehicleListView_ItemSelected"
+                 IsPullToRefreshEnabled="True" IsRefreshing="{Binding IsBusy, Mode=OneWay}"  CachingStrategy="RecycleElement" >
+
             <ListView.ItemTemplate>
-                <DataTemplate>
-                    
-                    <ViewCell>
-                        <StackLayout  Padding="10" Orientation="Horizontal" HorizontalOptions="Center">
-                            <Label Text="{Binding Name, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
-                            <Label Text="{Binding Id, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16"/>
-                            <Label Text="{Binding Abbreviation, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
-                        </StackLayout>
+                <DataTemplate >
+
+                    <ViewCell >
+                        <ViewCell.ContextActions>
+                            <MenuItem Clicked="OnMore"  Text="More" CommandParameter="{Binding Id}"/>
+                            <MenuItem  Clicked="OnDelete" Text="Delete" IsDestructive="True" CommandParameter="{Binding Name}" />
+                        </ViewCell.ContextActions>
+                            <StackLayout Padding="10" Orientation="Horizontal" HorizontalOptions="Center">
+                                <Label x:Name="VehicleMake_name"  Text="{Binding Name, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
+                                <Label Text="{Binding Id, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16"/>
+                                <Label Text="{Binding Abbreviation, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
+                            </StackLayout>
+               
                     </ViewCell>
                     
                 </DataTemplate>

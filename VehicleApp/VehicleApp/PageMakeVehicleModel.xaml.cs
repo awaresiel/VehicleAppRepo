@@ -15,19 +15,20 @@ namespace VehicleApp
     {
         IVehicleModelViewModel vm;
         string VehicleMakeName;
-        public PageMakeVehicleModel(string VehicleMake,bool isEdit)
+        public PageMakeVehicleModel(string VehicleMake,int id)
         {
             InitializeComponent();
             this.VehicleMakeName = VehicleMake;
-            using (var scope = App.Container.BeginLifetimeScope())
-            {
-                vm = App.Container.Resolve<IVehicleModelViewModel>(new TypedParameter(typeof(string), VehicleMake));
-            }
-            vm.IsEditVehicleModel(isEdit);
+           
+             vm = App.Container.Resolve<IVehicleModelViewModel>(new TypedParameter(typeof(string), VehicleMake));
+          
+            vm.IsEditVehicleModel(VehicleMake,id);
             BindingContext = vm;
         }
 
-       async private void Button_Clicked(object sender, EventArgs e)
+       
+
+        async private void Button_Clicked(object sender, EventArgs e)
         {
             bool isCreated = await vm.CreateVehicleModel();
 

@@ -6,27 +6,13 @@ using Repository;
 using System.Linq;
 using System.Threading;
 using System.Diagnostics;
+using AutoMapper.Configuration.Conventions;
 
 namespace Service
 {
-    public interface IVehicleModelService
-    {
-        Task<VehicleModelService> GetVehicleModelService(IVehicleModel s);
-        Task<List<VehicleModel>> getVehicleModelListAsync(string name);
-        Task<bool> CreateVehicleModel(string vehicleMakeName,int id, int makeID, string name, string abbreviation);
-        Task<List<VehicleModel>> SortVehicleModelsASC_DESC(string nameOfModel, bool ascOrDesc);
-        Task<List<VehicleModel>> GetVehicleModel(string name, int id);
-        Task<bool> DeleteVehicleModel(string name, int id);
-
-    }
     public class VehicleModelService : IVehicleModelService
     {
-       async public Task<VehicleModelService> GetVehicleModelService(IVehicleModel s)
-        {
-            return await Task.FromResult(new VehicleModelService(s));
-        }
-
-
+      
         IVehicleModel iVehicleModel;
        public static Dictionary<string, List<VehicleModel>> modelsList { get; private set; }
 
@@ -34,11 +20,9 @@ namespace Service
         {
             this.iVehicleModel = iVehicleModel;
             InitModels();
-
-
         }
 
-
+        #region Mock Data Initialization
         public static void InitModels()
         {
             if (modelsList==null)
@@ -83,13 +67,15 @@ namespace Service
             }
            
         }
+        #endregion
 
-       async public Task<List<VehicleModel>> getVehicleModelListAsync(string name)
+        async public Task<List<VehicleModel>> getVehicleModelListAsync(string name,bool order)
         {
             
-           var list = await Task.Run(()=> getListFromDictionary(name));
+           //var list = await Task.Run(()=> getListFromDictionary(name));
+           var list = await Task.FromResult( await SortVehicleModelsASC_DESC(name,order));
 
-            return list ;
+            return list;
         }
 
         private List<VehicleModel> getListFromDictionary(string name)
@@ -107,22 +93,58 @@ namespace Service
             
         }
 
-       
-       
-
-      async  public Task<bool> CreateVehicleModel(string vehicleMakeName, int id, int makeID, string name, string abbreviation)
+       public async Task<bool> UpdateDictionaryKey(string oldKey,string newKey)
         {
-            var vehicle = iVehicleModel.GetVehicleModel(id,makeID,name,abbreviation);
-            lock (this)
+            if (modelsList.ContainsKey(oldKey))
             {
-                modelsList[vehicleMakeName].Add(vehicle);
+                var values = modelsList[oldKey];
+               bool isRemoved= await Task.FromResult(modelsList.Remove(oldKey));
+
+                if (isRemoved)
+                {
+                  modelsList.Add(newKey, values);
+                }
+                
+                return modelsList.ContainsKey(newKey);
             }
-            return await Task.FromResult(modelsList[vehicleMakeName].Contains(vehicle));
+            else
+            {
+                return false;
+            }
+           
         }
+
+      async  public Task<bool> CreateVehicleModel(string vehicleMakeName, int oldId,int id, int makeID, string name, string abbreviation)
+        {
+            var items = await Task.FromResult(modelsList[vehicleMakeName].Any(v=> v.Id==oldId));
+            if (!items)
+            {
+                var vehicle = iVehicleModel.GetVehicleModel(id, makeID, name, abbreviation);
+                lock (this)
+                {
+                    modelsList[vehicleMakeName].Add(vehicle);
+                }
+                return await Task.FromResult(modelsList[vehicleMakeName].Contains(vehicle));
+            }
+            else
+            {
+               await Task.FromResult(modelsList[vehicleMakeName].RemoveAll(v=> v.Id==oldId));
+
+                var vehicle = iVehicleModel.GetVehicleModel(id, makeID, name, abbreviation);
+                lock (this)
+                {
+                  modelsList[vehicleMakeName].Add(vehicle);
+                }
+                return await Task.FromResult(modelsList[vehicleMakeName].Contains(vehicle));
+
+            }
+           
+        }
+        
 
         public async Task<List<VehicleModel>> SortVehicleModelsASC_DESC(string nameOfModel,bool ascOrDesc)
         {
-            List<VehicleModel> templist = modelsList[nameOfModel];
+            List<VehicleModel> templist = getListFromDictionary(nameOfModel);
 
             if (ascOrDesc)
             {
@@ -140,11 +162,11 @@ namespace Service
         public async Task<List<VehicleModel>> GetVehicleModel(string name,int id)
         {
 
-            var item = await Task.Run(() => modelsList[name].Any(v => v.Id == id));
+            var item = await Task.FromResult( modelsList[name].Any(v => v.Id == id));
 
             if (item)
             {
-               var list = await Task.Run(() => modelsList[name].FindAll((v) => v.Id == id).ToList());
+               var list = await Task.FromResult( modelsList[name].FindAll((v) => v.Id == id).ToList());
 
                 return list;
             }
@@ -153,16 +175,25 @@ namespace Service
 
         }
 
-        public async Task<bool> DeleteVehicleModel(string name,int id)
+        public async Task<bool> DeleteVehicleModel(string name,int id,bool deleteEntireVehicleMake)
         {
-            int number = await Task.Run(() => modelsList[name].RemoveAll((v) => v.Id == id));
-            if (number > 0)
+            if (deleteEntireVehicleMake)
             {
-                return true;
+             
+               var result=  await Task.FromResult( modelsList.Remove(name));
+               return result;
             }
             else
             {
-                return false;
+                int number = await Task.FromResult(modelsList[name].RemoveAll((v) => v.Id == id));
+                if (number > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 

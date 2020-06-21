@@ -8,10 +8,11 @@
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Add Vehicle Make"
-                 IconImageSource="example_icon.png"
+                        CommandParameter="{Binding Id}"
                      Clicked="ToolbarItem_Clicked_Add_Vehicle_Make"
                  Order="Primary"
-                 Priority="1" />
+                 Priority="2" />
+        <ToolbarItem Text="{Binding OrderName}" Order="Primary" Priority="1" Clicked="ToolbarItem_Order_Clicked"/>
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout>
@@ -19,7 +20,14 @@
                         IsRefreshing="{Binding IsBusy, Mode=OneWay}" CachingStrategy="RecycleElement" >
                 <ListView.ItemTemplate>
                     <DataTemplate>
+                        
                         <ViewCell>
+
+                            <ViewCell.ContextActions>
+                                <MenuItem Clicked="OnMore"  Text="More" CommandParameter="{Binding Id}"/>
+                                <MenuItem  Clicked="OnDelete" Text="Delete" IsDestructive="True" CommandParameter="{Binding Id}" />
+                            </ViewCell.ContextActions>
+
                             <StackLayout Padding="10">
                                 <Label Text="Model Name" FontSize="18" HorizontalOptions="CenterAndExpand" FontAttributes="Bold"/>
                                 

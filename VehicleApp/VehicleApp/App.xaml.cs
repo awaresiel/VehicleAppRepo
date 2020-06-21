@@ -18,7 +18,7 @@ namespace VehicleApp
         public static IMapper Mapper { get; set; }
         public App()
         {
-           
+            
             RegisterAutofac();
 
             Mapper = Container.Resolve<IMapper>();
@@ -50,7 +50,9 @@ namespace VehicleApp
             //register automapper
             builder.Register(ctx => new MapperConfiguration(cfg =>
             { cfg.CreateMap<VehicleMake, VehicleMakeViewModel>(); 
-              cfg.CreateMap<VehicleMakeViewModel, VehicleMake>(); }
+              cfg.CreateMap<VehicleMakeViewModel, VehicleMake>(); 
+              
+            }
             )).AsSelf().SingleInstance();
 
             builder.Register(c =>
