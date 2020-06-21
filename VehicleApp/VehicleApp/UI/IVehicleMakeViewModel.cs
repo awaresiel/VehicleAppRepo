@@ -10,7 +10,6 @@ namespace VehicleApp.UI
         void IsEditVehicleMake(int id);
         int ListCount();
         ICommand GetCommand();
-
         bool GetOrder();
         void SetOrder(bool order);
     }
