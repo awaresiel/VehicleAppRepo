@@ -1,166 +1,75 @@
-﻿using Repository;
+﻿using Autofac;
+using Repository;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using VehicleApp;
-using Xamarin.Forms;
-using Xamarin.Forms.Internals;
+using VehicleApp.Repository;
 
 namespace Service
 {
-
-    public class VehicleMakeService: IVehicleMakeService
+    public class VehicleMakeService : IVehicleMakeService
     {
-     
+        public List<VehicleMake> vehiclesList { get; private set; }
 
-        public static List<VehicleMake> vehiclesList { get; private set; } = new List<VehicleMake>(){
-
-             // taken from https://nhts.ornl.gov/2009/pub/2009FARSMakeModel.pdf
-                new VehicleMake(54, "Acura", "(ACUR)"),
-                new VehicleMake(31, "Alfa Romeo", "(ALFA)"),
-                new VehicleMake(03, "AM General", "(AMGN)"),
-                new VehicleMake(01, "American Motors", "(AMER)"),
-                new VehicleMake(32, "Audi", "(AUDI)")
-
-            };
-        IVehicleMake iVehicleMake;
-        public  VehicleMakeService(IVehicleMake iVehicleMake)
+       private Irepository<VehicleMakeEntity> database;
+        public VehicleMakeService(Irepository<VehicleMakeEntity> d)
         {
-            this.iVehicleMake = iVehicleMake;
+            database = d;
         }
-
-      
-
-        public async Task<List<VehicleMake>> GetVehicleByID(int id)
+        private VehicleMake MapToVehicleMake(VehicleMakeEntity vehicle)
         {
-          
-            var item = await Task.FromResult( vehiclesList.Any( v => v.Id == id));
-            
-            if (item)
-            {
-                List<VehicleMake> list = await Task.FromResult(vehiclesList.FindAll( (v) =>  v.Id == id).ToList());
-                
-
-                return list;
-            }
-
-            return null;
-            
+           return App.Mapper.Map<VehicleMakeEntity, VehicleMake>(vehicle);
         }
-
-        public async Task<List<VehicleMake>> UpdateVehicle(int id,VehicleMake vehicleMake)
+        private List<VehicleMake> MapToVehicleMakeList(List<VehicleMakeEntity> vehicle)
         {
-
-
-            var index = await Task.FromResult(vehiclesList.FindIndex(v => v.Id == id));
-
-            if (index !=-1)
-            {
-               
-                vehiclesList[index] = vehicleMake;
-            
-                return vehiclesList;
-            }
-
-            return null;
-
+            return App.Mapper.Map<List<VehicleMakeEntity>,List< VehicleMake>>(vehicle);
         }
+        private VehicleMakeEntity MapToVehicleMakeEntity(VehicleMake vehicle)
+        {
+            return App.Mapper.Map<VehicleMake, VehicleMakeEntity>(vehicle);
+        }
+       
 
+        public async Task<VehicleMake> GetVehicleByID(int id)
+        {   
+           var vehicle= await database.GetVehicleAsync(id);
+            return MapToVehicleMake(vehicle);
+         
+        }
+        public async Task<int> UpdateVehicle(VehicleMake vehicleMake)
+        {
+            return await database.SaveVehicleAsync(MapToVehicleMakeEntity(vehicleMake));
+        }
         public async Task<List<VehicleMake>> GetVehiclesAsync(bool ascOrDesc)
         {
-            var list =  SortVehiclesASC_DESC(ascOrDesc);
-            
-                return await list;
-            
+            var list = await SortVehiclesASC_DESC(ascOrDesc);
+            return list;
         }
-
-        public async Task<bool> DeleteVehicle(string name)
+        public async Task<bool> DeleteVehicle(VehicleMake make)
         {
-            int number = await Task.FromResult( vehiclesList.RemoveAll((v) => v.Name == name));
-            if (number>0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            int number = await database.DeleteVehicleAsync(make.dataBaseId);
+            return number > 0;
         }
-        public async Task<List<VehicleMake>> FilterVehicles(string name)
+        public async Task<bool> DeleteVehicleAsyncWithSameName(string make)
         {
-            List<VehicleMake> tempList = vehiclesList;
-
-            var list = await Task.Run(() => tempList.FindAll(v => v.Name == name));
-
-            tempList.Clear();
-            foreach (var item in tempList) tempList.Add(item);
-
-            return tempList;
+            int number = await database.DeleteVehicleAsyncWithSameName(make);
+            return number > 0;
         }
-
-
         async public Task<List<VehicleMake>> SortVehiclesASC_DESC(bool ascOrDesc)
         {
-            List<VehicleMake> templist = vehiclesList;
-
-            if (ascOrDesc)
-            {
-
-                
-             //       var tl = Task.Run(() =>
-             //      {
-             //          var stopwatch = new Stopwatch();
-             //           stopwatch.Start();
-             //          System.Threading.Thread.Sleep(2000);
-             //          Debug.WriteLine("===== async: Running for {0} seconds, Thread name= {1}", stopwatch.Elapsed.TotalSeconds, System.Threading.Thread.CurrentThread.Name);
-             //          stopwatch.Stop();
-
-             //          return templist.OrderBy(v => v.Name).ToList();
-             //      });
-             //       Debug.WriteLine("== Another thread name main threard = " + System.Threading.Thread.CurrentThread.ToString());
-                    
-               
-                //var tl = await Task.Run(()=>  templist.OrderBy(v => v.Name).ToList());
-                var tl =  Task.FromResult( templist.OrderBy(v => v.Name).ToList());
-
-                return await tl;
-                
-            }
-            else
-            {
-               // var tl =  Task.Run(()=> templist.OrderByDescending(v1 => v1.Name).ToList());
-                var tl = await Task.FromResult( templist.OrderByDescending(v1 => v1.Name).ToList());
-          
-                return  tl;
-            }
-            
+            var list = await database.GetVehiclesAsync(ascOrDesc, "");
+            var sorted=  MapToVehicleMakeList(list);
+            return sorted;
         }
-
-       async public Task<bool> MakeVehicle(int id, string name, string abbr)
+        async public Task<bool> InsertVehicle(int id, string name, string abbr)
         {
-            var vehicle = iVehicleMake.MakeVehicle(id, name, abbr);
-            lock (this)
-            {
-
-                if (vehiclesList.Any(v=> v.Id == id))
-                {
-                    vehiclesList.RemoveAll(v => v.Id == id);
-                    
-                }
-             
-                    vehiclesList.Add(vehicle);
-
-
-
-            }
-
-            return await Task.FromResult(vehiclesList.Contains(vehicle));
+            var vehicle = new VehicleMake(id, name, abbr);
+            var entity = MapToVehicleMakeEntity(vehicle);
+            var result = await database.SaveVehicleAsync(entity);
+            return result > 0;
         }
-
-       
     }
 }

@@ -24,14 +24,14 @@
                         <ViewCell>
 
                             <ViewCell.ContextActions>
-                                <MenuItem Clicked="OnMore"  Text="More" CommandParameter="{Binding Id}"/>
-                                <MenuItem  Clicked="OnDelete" Text="Delete" IsDestructive="True" CommandParameter="{Binding Id}" />
+                                <MenuItem Clicked="OnMore"  Text="More" CommandParameter="{Binding .}"/>
+                                <MenuItem  Clicked="OnDelete" Text="Delete" IsDestructive="True" CommandParameter="{Binding .}" />
                             </ViewCell.ContextActions>
 
                             <StackLayout Padding="10">
                                 <Label Text="Model Name" FontSize="18" HorizontalOptions="CenterAndExpand" FontAttributes="Bold"/>
-                                
-                                <Label Text="{Binding Name}" LineBreakMode="WordWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" HorizontalOptions="CenterAndExpand"/>
+
+                                <Label Text="{Binding ModelName}" LineBreakMode="WordWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" HorizontalOptions="CenterAndExpand"/>
                                 
                                 <Label Text="Model Abbreviation" FontSize="18" HorizontalOptions="CenterAndExpand"  FontAttributes="Bold"/>
                                 

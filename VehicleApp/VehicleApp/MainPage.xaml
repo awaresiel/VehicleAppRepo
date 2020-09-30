@@ -19,7 +19,6 @@
         <ToolbarItem Text="{Binding OrderName}" Order="Primary" Priority="1" Clicked="ToolbarItem_Order_Clicked"/>
     </ContentPage.ToolbarItems>
 
-
     <StackLayout>
         <!-- Place new controls here -->
         <ListView x:Name="VehicleListView" ItemsSource="{Binding VehicleMakeList}" VerticalOptions="FillAndExpand" HasUnevenRows="true" 
@@ -31,12 +30,12 @@
 
                     <ViewCell >
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="OnMore"  Text="More" CommandParameter="{Binding Id}"/>
-                            <MenuItem  Clicked="OnDelete" Text="Delete" IsDestructive="True" CommandParameter="{Binding Name}" />
+                            <MenuItem Clicked="OnMore"  Text="More" CommandParameter="{Binding .}"/>
+                            <MenuItem  Clicked="OnDelete" Text="Delete" IsDestructive="True" CommandParameter="{Binding .}" />
                         </ViewCell.ContextActions>
                             <StackLayout Padding="10" Orientation="Horizontal" HorizontalOptions="Center">
                                 <Label x:Name="VehicleMake_name"  Text="{Binding Name, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
-                                <Label Text="{Binding Id, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16"/>
+                            <Label Text="{Binding makeID, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16"/>
                                 <Label Text="{Binding Abbreviation, Mode=TwoWay}" LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}" FontSize="16" />
                             </StackLayout>
                

@@ -1,172 +1,173 @@
-﻿using Autofac;
+﻿
+using Autofac;
 using Repository;
 using Service;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
-
 namespace VehicleApp.UI
 {
-    public class VehicleModelViewModel : BaseViewModel, IVehicleModelViewModel
+    public class VehicleModelViewModel : BaseViewModel, IViewModel<VehicleModel>
     {
-        public Command LoadItemsCommand { get; set; }
-
-        public string Name { get; set; }
- 
-        public string Abbrivation { get; set; }
-
-        public int Id { get; set; }
-        public int MakeId { get; set; }
-
+       
+        private string name;
+        public string Name { get { return name; } set { SetProperty(ref name, value); } }
+        private string abrv;
+        public string Abbrivation { get { return abrv; } set { SetProperty(ref abrv,value); } }
+        private int id;
+        public int Id { get { return id; } set { SetProperty(ref id, value); } }
+        private int makeID;
+        public int MakeId { get { return makeID; } set { SetProperty(ref makeID, value); } }
         public ObservableCollection<VehicleModel> VehicleModelList { get; private set; }
-
-
-
-        string VehicleMakeName;
-
-        public VehicleModelViewModel(string name)
+       private string VehicleMakeName;
+        private VehicleModel temp;
+      
+        public VehicleModelViewModel(VehicleMake make, IVehicleMakeService s1, IVehicleModelService s2) : base(s1, s2)
         {
-            VehicleModelList = new ObservableCollection<VehicleModel>();
+             VehicleModelList = new ObservableCollection<VehicleModel>();
+
+            LoadItemsCommand = new Command(async () => await getVehicleModelList());
+            CreateVehicleCommand = new Command(execute: async () => await CreateVehicleModel());
+            OnAddVehicleCommand = new Command(execute: async () => await OnAddNewVehicleClicked());
+            DeleteItemCommand = new Command<VehicleModel>(execute: async v => await OnDeleteClicked(v));
+            OnMoreCommand = new Command<VehicleModel>(execute: async v => await OnMoreClicked(v));
+            OnSortOrderCommand = new Command(execute:  () =>  SortList());
+
             Title = "PageMakeVehicleModel";
-            VehicleMakeName = name;
-            LoadItemsCommand = new Command(async () => await getVehicleModelList(name));
+            VehicleMakeName = make.Name;
+            MakeId = make.makeID;
+           
             OrderName = Order ? "DESC" : "ASC";
-
         }
-
-        async public Task getVehicleModelList(string name)
+        async public Task getVehicleModelList()
         {
-            Debug.WriteLine("==============getVehicleModelList================ + " + name);
-
             if (IsBusy) return;
-
             IsBusy = true;
             try
             {
                 VehicleModelList.Clear();
-                var list = await iVehicleModelService.getVehicleModelListAsync(name, Order);
-
+                var list = await iVehicleModelService.getVehicleModelListAsync(VehicleMakeName, Order);
+                if (list == null || !list.Any()) return;
                 foreach (var item in list)
                 {
                     VehicleModelList.Add(item);
-
                 }
             }
             catch (Exception ex)
             {
-
                 Debug.WriteLine(ex);
             }
             finally
             {
-                IsBusy = false;
+                Xamarin.Forms.Device.BeginInvokeOnMainThread(() => IsBusy = false);
+                  //IsBusy = false;
             }
-
         }
-
-
-
-        async public Task<bool> CreateVehicleModel()
+        async public Task CreateVehicleModel()
         {
             bool isAdded = false;
-
-            if (Name == null || Id == 0 || Id<0 || Abbrivation == null)
+            if (Name == null || Id == 0 || Id < 0 || Abbrivation == null|| MakeId==0)
             {
-                return isAdded;
+                return;
             }
-            
-           
-            if (IdForEditing == -1)
+            if (temp != null)
             {
-                    // VehicleModel vehicleModel = App.Mapper.Map<VehicleModelViewModel, VehicleModel>(this);
-
-                    isAdded = await iVehicleModelService.CreateVehicleModel(VehicleMakeName,IdForEditing, Id, MakeId, Name, Abbrivation);
- 
+                isAdded = await iVehicleModelService.CreateVehicleModel(VehicleMakeName, temp.dataBaseId, MakeId, Id, Name, Abbrivation);
             }
             else
             {
-                    isAdded = await iVehicleModelService.CreateVehicleModel(VehicleMakeName,IdForEditing, Id, MakeId, Name, Abbrivation);
+                isAdded = await iVehicleModelService.CreateVehicleModel(VehicleMakeName, 0, MakeId, Id, Name, Abbrivation);
             }
-
-
-            return isAdded;
+             showResultOfVehicleCreation(isAdded);
         }
-
-        public async void IsEditVehicleModel(string name,int id)
+        public void IsEditVehicleModel( VehicleModel vehicle)
         {
-            Debug.WriteLine("==============IsEditVehicleModel================ " + id);
-            IdForEditing = id;
-            if (id != -1)
-            {
-                var vehicles = await iVehicleModelService.GetVehicleModel(name,id);
-                if (vehicles[0] != null)
+                if (vehicle != null)
                 {
-                    Name = vehicles[0].Name;
-                    Abbrivation = vehicles[0].Abbreviation;
-                    Id = vehicles[0].Id;
-                    MakeId = vehicles[0].MakeId;
-
-                    Debug.WriteLine("name === " + Name);
-                   
-
+                    Name = vehicle.ModelName;
+                    Abbrivation = vehicle.Abbreviation;
+                    Id = vehicle.Id;
+                    MakeId = vehicle.MakeId;
                 }
-               
-
-            }
-            
+                else
+                {
+                    Name = "";
+                    Abbrivation = "";
+                    Id = 0;
+                    temp = null;
+                   
+                }
         }
-
-        public int ListCount()
-        {
-            if (VehicleModelList != null)
-            {
-                Debug.WriteLine("==============List count not null================");
-                return VehicleModelList.Count();
-            }
-            return 0;
-        }
-
-        public ICommand GetCommand()
-        {
-            Debug.WriteLine("==============getcommand()================");
-            return LoadItemsCommand;
-        }
-
-        public bool GetOrder()
-        {
-            return Order;
-        }
-
+        
+      
         public void SetOrder(bool order)
         {
             Order = order;
             OrderName = Order ? "DESC" : "ASC";
+            LoadItemsCommand.Execute(null);
         }
-
-        async public Task<string> DeleteVehicleModel(string name, int id, bool deleteAll)
+        async public Task<string> DeleteVehicleModel( int databaseID, bool deleteAll)
         {
-            var model = await iVehicleModelService.GetVehicleModel(name,id);
-            Debug.WriteLine("== model[0].Name=="+model[0].Name);
-            var isDeleted= await iVehicleModelService.DeleteVehicleModel(name, model[0].Id, deleteAll);
-
+            var model = await iVehicleModelService.GetVehicleModel(databaseID);
+            var isDeleted = await iVehicleModelService.DeleteVehicleModel(model.MakeName,model.dataBaseId, deleteAll);
+           
             if (isDeleted)
             {
-                return model[0].Name;
+                return model.ModelName;
             }
             else
             {
                 return null;
             }
-            
         }
 
+        async public Task OnAddNewVehicleClicked()
+        {
+            IsEditVehicleModel(null);
+            var page = App.Container.Resolve<PageMakeVehicleModel>(new TypedParameter(typeof(IViewModel<VehicleModel>), this));
+            await PushNewPage(page);
+        }
+
+         private void SortList()
+        {
+            if (!Order)
+            {
+                SetOrder(true);
+            }
+            else
+            {
+                SetOrder(false);
+            }
+        }
+
+        private async Task OnMoreClicked(VehicleModel vehicle)
+        {
+            temp = vehicle;
+            IsEditVehicleModel(vehicle);
+            var page = App.Container.Resolve<PageMakeVehicleModel>(new TypedParameter(typeof(IViewModel<VehicleModel>), this));
+            await PushNewPage(page);
+        }
+
+        private async Task OnDeleteClicked(VehicleModel v)
+        {
+            var deletedVehicleName = await DeleteVehicleModel(v.dataBaseId, false);
+
+            if (deletedVehicleName != null)
+            {
+               
+                await DisplayAlert("Alert", "Vehicle " + deletedVehicleName + " deleted", "OK");
+                LoadItemsCommand.Execute(null);
+            }
+            else
+            {
+                await DisplayAlert("Alert", "Vehicle not deleted", "OK");
+                LoadItemsCommand.Execute(null);
+            }
+        }
 
     }
 }
