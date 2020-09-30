@@ -25,10 +25,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="PageVehicleModel.xaml.cs">
+      <DependentUpon>PageVehicleModel.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Update="PageMakeVehicle.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="PageMakeVehicleModel.xaml">
+    <EmbeddedResource Update="PageVehicleModel.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="VehicleModelPage.xaml">

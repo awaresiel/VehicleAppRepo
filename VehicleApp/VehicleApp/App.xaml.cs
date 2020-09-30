@@ -47,7 +47,7 @@ namespace VehicleApp
             
             builder.Register(ctx => new MainPage(ctx.Resolve<IViewModel<VehicleMake>>()));
             builder.RegisterType<PageMakeVehicle>();
-            builder.RegisterType<PageMakeVehicleModel>();
+            builder.RegisterType<PageVehicleModel>();
             builder.RegisterType<VehicleModelPage>();
             builder.RegisterType<VehicleMake>();
             builder.RegisterType<VehicleModel>();

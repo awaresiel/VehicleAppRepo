@@ -128,7 +128,7 @@ namespace VehicleApp.UI
         async public Task OnAddNewVehicleClicked()
         {
             IsEditVehicleModel(null);
-            var page = App.Container.Resolve<PageMakeVehicleModel>(new TypedParameter(typeof(IViewModel<VehicleModel>), this));
+            var page = App.Container.Resolve<PageVehicleModel>(new TypedParameter(typeof(IViewModel<VehicleModel>), this));
             await PushNewPage(page);
         }
 
@@ -148,7 +148,7 @@ namespace VehicleApp.UI
         {
             temp = vehicle;
             IsEditVehicleModel(vehicle);
-            var page = App.Container.Resolve<PageMakeVehicleModel>(new TypedParameter(typeof(IViewModel<VehicleModel>), this));
+            var page = App.Container.Resolve<PageVehicleModel>(new TypedParameter(typeof(IViewModel<VehicleModel>), this));
             await PushNewPage(page);
         }
 

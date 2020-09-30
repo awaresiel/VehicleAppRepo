@@ -7,10 +7,10 @@ using Xamarin.Forms.Xaml;
 namespace VehicleApp
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class PageMakeVehicleModel : ContentPage
+    public partial class PageVehicleModel : ContentPage
     {
         IViewModel<VehicleModel> vm;
-        public PageMakeVehicleModel(IViewModel<VehicleModel> vm)
+        public PageVehicleModel(IViewModel<VehicleModel> vm)
         {
             InitializeComponent();
             this.vm = vm;

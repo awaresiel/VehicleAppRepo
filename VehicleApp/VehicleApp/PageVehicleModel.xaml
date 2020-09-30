@@ -4,7 +4,7 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             x:Class="VehicleApp.PageMakeVehicleModel">
+             x:Class="VehicleApp.PageVehicleModel">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical" HeightRequest="200" WidthRequest="300" BackgroundColor="White">
             <Entry Margin="20,20,20,10" Placeholder="Enter Name" Text="{Binding Name}" ></Entry>
